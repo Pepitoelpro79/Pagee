@@ -160,11 +160,18 @@ app.delete('/api/history', (req, res) => {
 const CookieFile = path.join(DataDir, 'cookies.txt');
 function getYtdlpArgs(extra = []) {
   const args = [];
-  args.push('--extractor-args', 'youtube:player_client=android_embedded,web;skip=webpage');
+  args.push('--extractor-args', 'youtube:player_client=android,web');
   args.push('--no-warnings');
-  if (isWin) args.push('--cookies-from-browser', 'chrome');
-  else if (fs.existsSync(CookieFile)) args.push('--cookies', CookieFile);
   args.push('--socket-timeout', '30');
+  if (isWin) {
+    const chromeCookies = path.join(process.env.LOCALAPPDATA || '', 'Google', 'Chrome', 'User Data', 'Default', 'Cookies');
+    const edgeCookies = path.join(process.env.LOCALAPPDATA || '', 'Microsoft', 'Edge', 'User Data', 'Default', 'Cookies');
+    const braveCookies = path.join(process.env.LOCALAPPDATA || '', 'BraveSoftware', 'Brave-Browser', 'User Data', 'Default', 'Cookies');
+    if (fs.existsSync(chromeCookies)) args.push('--cookies-from-browser', 'chrome');
+    else if (fs.existsSync(edgeCookies)) args.push('--cookies-from-browser', 'edge');
+    else if (fs.existsSync(braveCookies)) args.push('--cookies-from-browser', 'brave');
+  }
+  if (fs.existsSync(CookieFile)) args.push('--cookies', CookieFile);
   return args.concat(extra);
 }
 function runYtdlp(args) {
