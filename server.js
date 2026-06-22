@@ -157,9 +157,19 @@ app.delete('/api/history', (req, res) => {
 });
 
 // ============ YT-DLP HELPERS ============
+const CookieFile = path.join(DataDir, 'cookies.txt');
+function getYtdlpArgs(extra = []) {
+  const args = [];
+  args.push('--extractor-args', 'youtube:player_client=android_embedded,web;skip=webpage');
+  args.push('--no-warnings');
+  if (isWin) args.push('--cookies-from-browser', 'chrome');
+  else if (fs.existsSync(CookieFile)) args.push('--cookies', CookieFile);
+  args.push('--socket-timeout', '30');
+  return args.concat(extra);
+}
 function runYtdlp(args) {
   return new Promise((resolve, reject) => {
-    execFile(ytdlp, args, { maxBuffer: 10 * 1024 * 1024 }, (err, stdout, stderr) => {
+    execFile(ytdlp, getYtdlpArgs(args), { maxBuffer: 10 * 1024 * 1024 }, (err, stdout, stderr) => {
       if (err && !stdout) return reject(new Error(stderr || err.message));
       resolve(stdout);
     });
@@ -167,7 +177,7 @@ function runYtdlp(args) {
 }
 function downloadYtdlp(args) {
   return new Promise((resolve, reject) => {
-    execFile(ytdlp, args, { maxBuffer: 100 * 1024 * 1024, timeout: 600000 }, (err, stdout, stderr) => {
+    execFile(ytdlp, getYtdlpArgs(args), { maxBuffer: 100 * 1024 * 1024, timeout: 600000 }, (err, stdout, stderr) => {
       if (err) return reject(new Error(err.message));
       resolve(stdout);
     });
@@ -402,6 +412,18 @@ app.post('/api/ai/program', async (req, res) => {
     const detectedLang = codeBlocks.length > 0 ? (codeBlocks[0].language || lang) : lang;
     res.json({ reply, code: extractedCode || '', language: detectedLang, blocks: codeBlocks });
   } catch (e) { res.json({ reply: 'Error interno: ' + e.message, code: '', language: (req.body && req.body.language) || 'javascript' }); }
+});
+
+// ============ COOKIES UPLOAD ============
+app.post('/api/cookies', express.text(), (req, res) => {
+  try {
+    if (!req.body || typeof req.body !== 'string' || !req.body.trim()) return res.status(400).json({ error: 'Contenido requerido' });
+    fs.writeFileSync(CookieFile, req.body, 'utf8');
+    res.json({ ok: true, message: 'Cookies guardadas' });
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+app.get('/api/cookies-status', (req, res) => {
+  res.json({ hasCookies: fs.existsSync(CookieFile) });
 });
 
 // ============ STATIC FILES ============
