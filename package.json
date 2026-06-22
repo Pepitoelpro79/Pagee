@@ -4,7 +4,8 @@
   "description": "YouTube Music Hub - Download, search, and AI assistant",
   "main": "server.js",
   "scripts": {
-    "start": "node server.js"
+    "start": "node server.js",
+    "postinstall": "node -e \"if(process.platform!='win32'){const{execSync}=require('child_process');execSync('curl -L https://github.com/yt-dlp/yt-dlp/releases/latest/download/yt-dlp -o yt-dlp && chmod +x yt-dlp',{cwd:__dirname,stdio:'inherit'})}\""
   },
   "dependencies": {
     "express": "^4.18.2"

@@ -9,8 +9,13 @@ const PORT = 5000;
 const ScriptDir = __dirname;
 const DataDir = path.join(ScriptDir, 'data');
 const DownloadsDir = path.join(ScriptDir, 'downloads');
-const ytdlp = path.join(ScriptDir, 'yt-dlp.exe');
-const ffmpeg = path.join(ScriptDir, 'ffmpeg.exe');
+const isWin = process.platform === 'win32';
+const ytdlp = isWin
+  ? path.join(ScriptDir, 'yt-dlp.exe')
+  : (fs.existsSync(path.join(ScriptDir, 'yt-dlp')) ? path.join(ScriptDir, 'yt-dlp') : 'yt-dlp');
+const ffmpeg = isWin
+  ? (fs.existsSync(path.join(ScriptDir, 'ffmpeg.exe')) ? path.join(ScriptDir, 'ffmpeg.exe') : 'ffmpeg.exe')
+  : (fs.existsSync('/usr/bin/ffmpeg') ? '/usr/bin/ffmpeg' : 'ffmpeg');
 
 for (const d of [DownloadsDir, DataDir]) { if (!fs.existsSync(d)) fs.mkdirSync(d, { recursive: true }); }
 
