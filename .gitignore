@@ -1,0 +1,7 @@
+node_modules/
+downloads/
+data/
+.env
+*.log
+*.exe
+iniciar.bat
