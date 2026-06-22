@@ -6,25 +6,26 @@
 <title>MusicHub — Busca, descarga y descubre musica</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+<script src="https://accounts.google.com/gsi/client" async defer></script>
 <style>
 *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
 :root {
-  --bg: #07070a; --bg2: #0b0b12;
-  --surface: rgba(14,14,22,0.82); --surface2: rgba(20,20,30,0.90); --surface3: rgba(28,28,40,0.94); --surface4: rgba(38,38,52,0.96);
-  --border: rgba(255,255,255,0.05); --border-h: rgba(255,255,255,0.08); --border-accent: rgba(168,85,247,0.15);
-  --text: #f0f0f4; --text2: #9a9aaa; --text3: #555568; --text4: #3d3d50;
-  --accent: #a855f7; --accent2: #7c3aed; --accent3: #6366f1;
-  --accent-dim: rgba(168,85,247,0.08); --accent-mid: rgba(168,85,247,0.18);
-  --accent-glow: rgba(168,85,247,0.25); --accent-glow2: rgba(168,85,247,0.12);
-  --green: #22c55e; --green-dim: rgba(34,197,94,0.10);
-  --red: #ef4444; --red-dim: rgba(239,68,68,0.10);
-  --orange: #f59e0b; --orange-dim: rgba(245,158,11,0.10);
-  --blue: #3b82f6; --blue-dim: rgba(59,130,246,0.10);
-  --radius: 10px; --radius-lg: 14px; --radius-xl: 20px;
+  --bg: #000; --bg2: #050505;
+  --surface: rgba(10,10,10,0.85); --surface2: #0f0f0f; --surface3: #181818; --surface4: #222;
+  --border: rgba(255,255,255,0.06); --border-h: rgba(255,255,255,0.10); --border-accent: rgba(255,255,255,0.12);
+  --text: #f5f5f5; --text2: #999; --text3: #555; --text4: #333;
+  --accent: #fff; --accent2: #ccc; --accent3: #888;
+  --accent-dim: rgba(255,255,255,0.06); --accent-mid: rgba(255,255,255,0.12);
+  --accent-glow: rgba(255,255,255,0.08); --accent-glow2: rgba(255,255,255,0.04);
+  --green: #22c55e; --green-dim: rgba(34,197,94,0.08);
+  --red: #ef4444; --red-dim: rgba(239,68,68,0.08);
+  --orange: #f59e0b; --orange-dim: rgba(245,158,11,0.08);
+  --blue: #3b82f6; --blue-dim: rgba(59,130,246,0.08);
+  --radius: 8px; --radius-lg: 12px; --radius-xl: 16px;
   --font: 'Inter', -apple-system, system-ui, sans-serif;
-  --shadow: 0 8px 32px rgba(0,0,0,.50);
+  --shadow: 0 4px 24px rgba(0,0,0,.50);
 }
-::selection { background:var(--accent); color:#fff; }
+::selection { background:#fff; color:#000; }
 html { scroll-behavior:smooth; }
 body {
   font-family:var(--font); background:var(--bg); color:var(--text); min-height:100vh; overflow-x:hidden;
@@ -34,7 +35,7 @@ body {
 body::before {
   content:''; position:fixed; inset:0; z-index:0; pointer-events:none;
   background:
-    radial-gradient(ellipse 650px 450px at 12% 22%, rgba(168,85,247,0.07) 0%, transparent 70%),
+    radial-gradient(ellipse 650px 450px at 12% 22%, rgba(255,255,255,0.07) 0%, transparent 70%),
     radial-gradient(ellipse 550px 500px at 88% 78%, rgba(99,102,241,0.04) 0%, transparent 70%),
     radial-gradient(ellipse 400px 300px at 45% 55%, rgba(34,197,94,0.02) 0%, transparent 70%);
 }
@@ -42,17 +43,22 @@ canvas#particles { position:fixed; inset:0; z-index:0; pointer-events:none; }
 .app { width:100%; max-width:960px; padding:0 0 6rem; position:relative; z-index:1; }
 
 /* AUTH MODAL */
-.modal-overlay { position:fixed; inset:0; z-index:1000; background:rgba(0,0,0,.7); backdrop-filter:blur(8px); display:none; align-items:center; justify-content:center; padding:1rem; animation:fadeIn .2s; }
+.modal-overlay { position:fixed; inset:0; z-index:1000; background:rgba(0,0,0,.85); backdrop-filter:blur(12px); display:none; align-items:center; justify-content:center; padding:1rem; animation:fadeIn .2s; }
 .modal-overlay.show { display:flex; }
 @keyframes fadeIn { from{opacity:0} to{opacity:1} }
-.modal { background:var(--surface); border:1px solid var(--border); border-radius:var(--radius-xl); padding:1.5rem; max-width:380px; width:100%; backdrop-filter:blur(20px); box-shadow:var(--shadow); position:relative; animation:modalIn .25s cubic-bezier(.4,0,.2,1); }
-@keyframes modalIn { from{transform:scale(.92) translateY(10px);opacity:0} to{transform:scale(1) translateY(0);opacity:1} }
-.modal-close { position:absolute; top:.75rem; right:.75rem; width:32px; height:32px; border-radius:8px; border:none; background:var(--surface2); color:var(--text3); cursor:pointer; display:flex; align-items:center; justify-content:center; font-size:.8rem; transition:all .2s; }
-.modal-close:hover { background:var(--red-dim); color:var(--red); }
-.modal-tabs { display:flex; gap:.25rem; margin-bottom:1rem; background:var(--surface2); border-radius:var(--radius); padding:.2rem; }
-.modal-tab { flex:1; padding:.5rem; text-align:center; border-radius:7px; border:none; background:transparent; color:var(--text3); cursor:pointer; font-size:.78rem; font-weight:500; font-family:inherit; transition:all .2s; }
-.modal-tab.active { background:var(--accent-dim); color:var(--accent); }
-.modal input { padding-left:.9rem !important; }
+.modal { background:#0a0a0a; border:1px solid var(--border); border-radius:var(--radius-xl); padding:1.5rem; max-width:360px; width:100%; box-shadow:var(--shadow); position:relative; animation:modalIn .25s cubic-bezier(.4,0,.2,1); }
+@keyframes modalIn { from{transform:scale(.95) translateY(8px);opacity:0} to{transform:scale(1) translateY(0);opacity:1} }
+.modal-header { font-size:1rem; font-weight:700; text-align:center; margin-bottom:1rem; }
+.modal-close { position:absolute; top:.65rem; right:.65rem; width:28px; height:28px; border-radius:6px; border:none; background:transparent; color:var(--text3); cursor:pointer; display:flex; align-items:center; justify-content:center; transition:all .2s; }
+.modal-close:hover { background:var(--surface3); color:var(--text); }
+.modal-divider { display:flex; align-items:center; gap:.6rem; margin:.7rem 0; color:var(--text3); font-size:.68rem; }
+.modal-divider::before, .modal-divider::after { content:''; flex:1; height:1px; background:var(--border); }
+.modal-tabs { display:flex; gap:.25rem; margin-bottom:.85rem; background:var(--surface2); border-radius:var(--radius); padding:.2rem; }
+.modal-tab { flex:1; padding:.45rem; text-align:center; border-radius:6px; border:none; background:transparent; color:var(--text3); cursor:pointer; font-size:.72rem; font-weight:500; font-family:inherit; transition:all .2s; }
+.modal-tab.active { background:var(--surface3); color:var(--text); }
+.modal input { padding-left:.85rem !important; }
+#googleBtn { display:flex; justify-content:center; margin:0 auto; }
+#googleBtn iframe { border-radius:8px !important; }
 
 /* USER BUTTON */
 .hdr-user { margin-left:auto; display:flex; align-items:center; gap:.35rem; }
@@ -60,17 +66,23 @@ canvas#particles { position:fixed; inset:0; z-index:0; pointer-events:none; }
 .btn-login:hover { border-color:var(--accent-dim); background:var(--accent-dim); color:var(--accent); }
 .btn-user { display:flex; align-items:center; gap:.4rem; padding:.35rem .6rem .35rem .35rem; border-radius:20px; border:1px solid var(--border); background:var(--surface2); cursor:pointer; color:var(--text); font-size:.75rem; font-weight:500; font-family:inherit; transition:all .2s; }
 .btn-user:hover { border-color:var(--accent-dim); background:var(--accent-dim); }
-.btn-user .u-avatar { width:28px; height:28px; border-radius:50%; background:linear-gradient(135deg,var(--accent),var(--accent3)); display:flex; align-items:center; justify-content:center; font-size:.65rem; color:#fff; font-weight:700; }
+.btn-user .u-avatar, .btn-user .u-avatar-img { width:26px; height:26px; border-radius:50%; flex-shrink:0; }
+.btn-user .u-avatar { background:var(--surface3); display:flex; align-items:center; justify-content:center; font-size:.6rem; color:var(--text2); font-weight:700; }
+.btn-user .u-avatar-img { object-fit:cover; }
+.btn-user .u-name { font-size:.75rem; font-weight:500; max-width:80px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
 
 /* HISTORY */
-.hist-item { display:flex; align-items:center; gap:.6rem; padding:.55rem .65rem; background:var(--surface2); border-radius:var(--radius); border:1px solid var(--border); margin-bottom:.35rem; animation:fadeUp .25s; }
-.hist-item:last-child { margin-bottom:0; }
-.hist-icon { width:32px; height:32px; border-radius:6px; background:var(--accent-dim); display:flex; align-items:center; justify-content:center; flex-shrink:0; font-size:.75rem; }
-.hist-info { flex:1; min-width:0; }
-.hist-title { font-size:.76rem; font-weight:600; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
-.hist-meta { font-size:.64rem; color:var(--text3); display:flex; gap:.4rem; }
-.hist-user { font-size:.6rem; color:var(--accent); padding:1px 5px; border-radius:3px; background:var(--accent-dim); flex-shrink:0; }
-.hist-empty { text-align:center; padding:2rem; color:var(--text3); font-size:.82rem; }
+.hist-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(300px,1fr)); gap:.5rem; }
+.hist-item { display:flex; gap:.6rem; padding:.5rem; background:var(--surface2); border-radius:var(--radius-lg); border:1px solid var(--border); animation:fadeUp .25s; transition:all .2s; }
+.hist-item:hover { border-color:var(--border-h); background:var(--surface3); }
+.hist-thumb { width:56px; height:56px; border-radius:6px; object-fit:cover; flex-shrink:0; background:var(--surface3); }
+.hist-info { flex:1; min-width:0; display:flex; flex-direction:column; gap:2px; }
+.hist-title { font-size:.78rem; font-weight:600; display:-webkit-box; -webkit-line-clamp:1; -webkit-box-orient:vertical; overflow:hidden; }
+.hist-meta { font-size:.62rem; color:var(--text3); display:flex; flex-wrap:wrap; gap:3px 8px; }
+.hist-meta span { display:inline-flex; align-items:center; gap:3px; }
+.hist-user { display:inline-flex; align-items:center; gap:4px; font-size:.62rem; color:var(--text2); padding:2px 6px; border-radius:4px; background:var(--accent-dim); flex-shrink:0; white-space:nowrap; }
+.hist-user img { width:14px; height:14px; border-radius:50%; }
+.hist-empty { text-align:center; padding:2.5rem; color:var(--text3); font-size:.85rem; }
 
 /* HEADER like HyperV */
 .hdr {
@@ -111,7 +123,7 @@ canvas#particles { position:fixed; inset:0; z-index:0; pointer-events:none; }
 .tab:active { transform:scale(.96); }
 .tab.active {
   background:linear-gradient(135deg, var(--accent-dim), rgba(99,102,241,0.06));
-  color:var(--text); box-shadow:0 0 20px rgba(168,85,247,0.06);
+  color:var(--text); box-shadow:0 0 20px rgba(255,255,255,0.06);
 }
 
 /* PANELS */
@@ -224,8 +236,8 @@ textarea { font-family:var(--font); }
   overflow:hidden; transition:all .3s cubic-bezier(.4,0,.2,1);
   animation:fadeUp .35s both; cursor:default; position:relative;
 }
-.ri:hover { border-color:var(--border-accent); transform:translateY(-3px); box-shadow:0 12px 40px rgba(168,85,247,0.08); }
-.ri.ri-sel { border-color:var(--accent); box-shadow:0 0 0 1px var(--accent-dim), 0 8px 32px rgba(168,85,247,0.06); }
+.ri:hover { border-color:var(--border-accent); transform:translateY(-3px); box-shadow:0 12px 40px rgba(255,255,255,0.08); }
+.ri.ri-sel { border-color:var(--accent); box-shadow:0 0 0 1px var(--accent-dim), 0 8px 32px rgba(255,255,255,0.06); }
 .ri-thumb {
   width:100%; height:130px; position:relative; overflow:hidden; background:var(--surface3);
 }
@@ -281,7 +293,7 @@ textarea { font-family:var(--font); }
   display:flex; align-items:center; justify-content:center; cursor:pointer;
   background:rgba(0,0,0,.4); transition:all .2s; backdrop-filter:blur(4px);
 }
-.ri-cb-overlay:hover { border-color:var(--accent); background:rgba(168,85,247,.2); }
+.ri-cb-overlay:hover { border-color:var(--accent); background:rgba(255,255,255,.2); }
 .ri.ri-sel .ri-cb-overlay { border-color:var(--accent); background:var(--accent); box-shadow:0 0 12px var(--accent-glow); }
 .ri-cb-overlay svg { width:13px; height:13px; opacity:0; transition:opacity .15s; }
 .ri.ri-sel .ri-cb-overlay svg { opacity:1; }
@@ -301,7 +313,7 @@ textarea { font-family:var(--font); }
 /* PERMISSION CHECKBOX */
 .cw { display:flex; align-items:center; gap:.6rem; padding:.65rem .85rem; border-radius:var(--radius); background:var(--surface2); border:1px solid var(--border); cursor:pointer; margin:.65rem 0; font-size:.73rem; color:var(--text3); user-select:none; transition:all .2s; }
 .cw:hover { border-color:var(--text3); }
-.cw.ck { border-color:var(--accent-dim); background:rgba(168,85,247,.06); }
+.cw.ck { border-color:var(--accent-dim); background:rgba(255,255,255,.06); }
 .cbx { width:22px; height:22px; border:2px solid var(--text3); border-radius:6px; display:flex; align-items:center; justify-content:center; flex-shrink:0; transition:all .2s; }
 .cw.ck .cbx { border-color:var(--accent); background:var(--accent); box-shadow:0 0 10px var(--accent-glow); }
 .cbx svg { width:12px; height:12px; opacity:0; transition:opacity .15s; }
@@ -362,7 +374,7 @@ textarea { font-family:var(--font); }
 .msel { display:flex; gap:.35rem; margin-bottom:.65rem; }
 .mopt { flex:1; padding:.5rem .3rem; text-align:center; border-radius:9px; border:1px solid var(--border); background:var(--surface2); cursor:pointer; font-size:.68rem; color:var(--text3); font-family:inherit; transition:all .2s; }
 .mopt:hover { border-color:var(--text3); }
-.mopt.sel { border-color:var(--accent); color:var(--text); background:var(--accent-dim); box-shadow:0 0 20px rgba(168,85,247,.08); }
+.mopt.sel { border-color:var(--accent); color:var(--text); background:var(--accent-dim); box-shadow:0 0 20px rgba(255,255,255,.08); }
 .mopt .ml { display:block; font-weight:700; font-size:.74rem; }
 .mopt .md { display:block; font-size:.58rem; color:var(--text3); margin-top:2px; }
 
@@ -434,7 +446,7 @@ textarea { font-family:var(--font); }
     <div class="hdr-logo">&#9835;</div>
     <div class="hdr-text">Music<span>Hub</span></div>
     <div class="hdr-user" id="hdrUser">
-      <button class="btn-login" id="loginBtn" title="Iniciar sesion">&#128100;</button>
+      <button class="btn-login" id="loginBtn" title="Iniciar sesion"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></button>
     </div>
     <div class="hdr-ver">v5.0</div>
   </header>
@@ -618,8 +630,11 @@ textarea { font-family:var(--font); }
   <section class="panel" id="panel-history" role="tabpanel">
     <div class="gl" style="padding:1rem">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.65rem">
-        <span class="lbl" style="margin-bottom:0">Historial de descargas</span>
-        <button class="btn btn-sm btn-sec" id="clearHistBtn" style="padding:.3rem .6rem;font-size:.7rem;color:var(--red);border-color:var(--red-dim)">&#128465; Limpiar</button>
+        <span class="lbl" style="margin-bottom:0">Historial global de descargas</span>
+        <button class="btn btn-sm btn-sec" id="clearHistBtn" style="padding:.3rem .6rem;font-size:.7rem;color:var(--red);border-color:var(--red-dim)">
+          <svg width="12" height="12" viewBox="0 0 12 12" fill="none" style="vertical-align:middle;margin-right:2px"><path d="M1.5 3H10.5M4 3V1.5C4 1.22 4.22 1 4.5 1H7.5C7.78 1 8 1.22 8 1.5V3M9.5 3V10C9.5 10.55 9.05 11 8.5 11H3.5C2.95 11 2.5 10.55 2.5 10V3" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          Limpiar
+        </button>
       </div>
       <div class="sp" id="hsp"></div>
       <div class="msg err" id="herr"></div>
@@ -631,21 +646,27 @@ textarea { font-family:var(--font); }
 <!-- AUTH MODAL -->
 <div class="modal-overlay" id="authModal">
   <div class="modal">
-    <button class="modal-close" id="authClose">&#10005;</button>
+    <button class="modal-close" id="authClose">
+      <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M1 1L13 13M13 1L1 13" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+    </button>
+    <div class="modal-header">Acceder</div>
+    <div id="g_id_onload" data-client_id="1067844252804-3sckf8rue30tvjq7kqevufo6au2oqmsq.apps.googleusercontent.com" data-context="signin" data-ux_mode="popup" data-login_uri="" data-callback="handleGoogleCredential" data-auto_prompt="false"></div>
+    <div class="g_id_signin" id="googleBtn" data-type="standard" data-shape="rectangular" data-theme="outline" data-text="signin_with" data-size="large" data-logo_alignment="left" data-width="300"></div>
+    <div class="modal-divider"><span>o con email</span></div>
     <div class="modal-tabs">
       <button class="modal-tab active" data-form="login">Iniciar sesion</button>
       <button class="modal-tab" data-form="register">Registrarse</button>
     </div>
     <form id="loginForm" style="display:block">
-      <input type="text" id="loginUser" placeholder="Usuario" style="padding-left:.9rem;margin-bottom:.5rem">
-      <input type="password" id="loginPass" placeholder="Contraseña" style="padding-left:.9rem;margin-bottom:.65rem">
+      <input type="text" id="loginUser" placeholder="Usuario" style="margin-bottom:.5rem">
+      <input type="password" id="loginPass" placeholder="Contraseña" style="margin-bottom:.65rem">
       <button class="btn btn-block" type="submit">Entrar</button>
       <div class="msg err" id="loginErr" style="margin-top:.5rem"></div>
     </form>
     <form id="registerForm" style="display:none">
-      <input type="text" id="regUser" placeholder="Usuario (min 3 caracteres)" style="padding-left:.9rem;margin-bottom:.5rem">
-      <input type="email" id="regEmail" placeholder="Email (opcional)" style="padding-left:.9rem;margin-bottom:.5rem">
-      <input type="password" id="regPass" placeholder="Contraseña (min 4 caracteres)" style="padding-left:.9rem;margin-bottom:.65rem">
+      <input type="text" id="regUser" placeholder="Usuario (min 3 caracteres)" style="margin-bottom:.5rem">
+      <input type="email" id="regEmail" placeholder="Email (opcional)" style="margin-bottom:.5rem">
+      <input type="password" id="regPass" placeholder="Contraseña (min 4 caracteres)" style="margin-bottom:.65rem">
       <button class="btn btn-block" type="submit">Crear cuenta</button>
       <div class="msg err" id="regErr" style="margin-top:.5rem"></div>
     </form>
@@ -682,14 +703,14 @@ resize(); window.addEventListener('resize', resize);
 class Pt {
   constructor() { this.reset(); }
   reset() { this.x = Math.random() * W; this.y = Math.random() * H; this.r = Math.random() * 2 + .6; this.dx = (Math.random() - .5) * .3; this.dy = (Math.random() - .5) * .3; this.o = Math.random() * .4 + .08; this.oo = this.o; }
-  draw() { ctx.beginPath(); ctx.arc(this.x, this.y, this.r, 0, Math.PI * 2); ctx.fillStyle = `rgba(168,85,247,${this.o})`; ctx.fill(); }
+  draw() { ctx.beginPath(); ctx.arc(this.x, this.y, this.r, 0, Math.PI * 2); ctx.fillStyle = `rgba(255,255,255,${this.o})`; ctx.fill(); }
   update() { this.x += this.dx; this.y += this.dy; this.o = this.oo + Math.sin(Date.now() / 2000 + this.x) * .06; if (this.x < -10 || this.x > W + 10 || this.y < -10 || this.y > H + 10) this.reset(); this.draw(); }
 }
 for (let i = 0; i < 70; i++) pts.push(new Pt());
 function anim() {
   ctx.clearRect(0, 0, W, H);
   for (const p of pts) p.update();
-  for (let i = 0; i < pts.length; i++) for (let j = i + 1; j < pts.length; j++) { const dx = pts[i].x - pts[j].x, dy = pts[i].y - pts[j].y, dist = Math.sqrt(dx * dx + dy * dy); if (dist < 100) { ctx.beginPath(); ctx.moveTo(pts[i].x, pts[i].y); ctx.lineTo(pts[j].x, pts[j].y); ctx.strokeStyle = `rgba(168,85,247,${.04 * (1 - dist / 100)})`; ctx.lineWidth = .5; ctx.stroke(); } }
+  for (let i = 0; i < pts.length; i++) for (let j = i + 1; j < pts.length; j++) { const dx = pts[i].x - pts[j].x, dy = pts[i].y - pts[j].y, dist = Math.sqrt(dx * dx + dy * dy); if (dist < 100) { ctx.beginPath(); ctx.moveTo(pts[i].x, pts[i].y); ctx.lineTo(pts[j].x, pts[j].y); ctx.strokeStyle = `rgba(255,255,255,${.03 * (1 - dist / 100)})`; ctx.lineWidth = .5; ctx.stroke(); } }
   requestAnimationFrame(anim);
 }
 anim();
@@ -962,7 +983,7 @@ _('loginForm').addEventListener('submit', async e => {
   const u = _('loginUser').value.trim(), p = _('loginPass').value;
   if (!u || !p) { _('loginErr').textContent = 'Completa todos los campos'; _('loginErr').style.display = 'block'; return; }
   const d = await fetchAuth('/api/auth/login', { username:u, password:p });
-  if (d.token) { token = d.token; localStorage.setItem('token', token); hideAuth(); setUser(d.user.username); toast('Bienvenido, ' + d.user.username, 'ok'); }
+  if (d.token) { token = d.token; localStorage.setItem('token', token); hideAuth(); setUser(d.user.username, d.user.avatar); toast('Bienvenido, ' + d.user.username, 'ok'); }
   else { _('loginErr').textContent = d.error || 'Error'; _('loginErr').style.display = 'block'; }
 });
 _('registerForm').addEventListener('submit', async e => {
@@ -970,15 +991,30 @@ _('registerForm').addEventListener('submit', async e => {
   const u = _('regUser').value.trim(), e2 = _('regEmail').value.trim(), p = _('regPass').value;
   if (u.length < 3 || p.length < 4) { _('regErr').textContent = 'Usuario >3 y contraseña >4 caracteres'; _('regErr').style.display = 'block'; return; }
   const d = await fetchAuth('/api/auth/register', { username:u, email:e2||undefined, password:p });
-  if (d.token) { token = d.token; localStorage.setItem('token', token); hideAuth(); setUser(d.user.username); toast('Cuenta creada! Bienvenido', 'ok'); }
+  if (d.token) { token = d.token; localStorage.setItem('token', token); hideAuth(); setUser(d.user.username, d.user.avatar); toast('Cuenta creada! Bienvenido', 'ok'); }
   else { _('regErr').textContent = d.error || 'Error'; _('regErr').style.display = 'block'; }
 });
 
-function setUser(name) {
+// ===== GOOGLE AUTH =====
+function handleGoogleCredential(response) {
+  if (!response || !response.credential) return;
+  _('hsp').style.display = 'block';
+  fetch('/api/auth/google', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({ credential: response.credential }) })
+    .then(r => r.json())
+    .then(d => {
+      _('hsp').style.display = 'none';
+      if (d.token) { token = d.token; localStorage.setItem('token', token); hideAuth(); setUser(d.user.username, d.user.avatar); toast('Bienvenido, ' + d.user.username, 'ok'); }
+      else { toast('Error con Google: ' + (d.error||'?'), 'err'); }
+    })
+    .catch(e => { _('hsp').style.display = 'none'; toast('Error con Google', 'err'); });
+}
+
+function setUser(name, avatar) {
   currentUser = name;
-  _('hdrUser').innerHTML = '<button class="btn-user" id="userBtn"><span class="u-avatar">' + name.charAt(0).toUpperCase() + '</span>' + esc(name) + ' &#9660;</button>';
+  const avHtml = avatar ? '<img class="u-avatar-img" src="' + avatar + '" alt="">' : '<span class="u-avatar">' + name.charAt(0).toUpperCase() + '</span>';
+  _('hdrUser').innerHTML = '<button class="btn-user" id="userBtn">' + avHtml + '<span class="u-name">' + esc(name) + '</span></button>';
   _('userBtn').addEventListener('click', () => {
-    if (confirm('Cerrar sesion?')) { token = null; localStorage.removeItem('token'); currentUser = null; _('hdrUser').innerHTML = '<button class="btn-login" id="loginBtn">&#128100;</button>'; _('loginBtn').addEventListener('click', showAuth); toast('Sesion cerrada', ''); }
+    if (confirm('Cerrar sesion?')) { token = null; localStorage.removeItem('token'); currentUser = null; _('hdrUser').innerHTML = '<button class="btn-login" id="loginBtn"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></button>'; _('loginBtn').addEventListener('click', showAuth); toast('Sesion cerrada', ''); }
   });
 }
 
@@ -987,7 +1023,7 @@ async function checkAuth() {
   try {
     const r = await fetch('/api/auth/me', { headers:{'Authorization': token} });
     const d = await r.json();
-    if (d.user && d.user.username) setUser(d.user.username);
+    if (d.user && d.user.username) setUser(d.user.username, d.user.avatar);
     else { token = null; localStorage.removeItem('token'); }
   } catch(e) { token = null; localStorage.removeItem('token'); }
 }
@@ -997,7 +1033,7 @@ checkAuth();
 const origFetch = window.fetch;
 window.fetch = function(url, opts) {
   opts = opts || {};
-  if (token && typeof url === 'string' && url.startsWith('/api/') && !url.startsWith('/api/auth/login') && !url.startsWith('/api/auth/register')) {
+  if (token && typeof url === 'string' && url.startsWith('/api/') && !url.startsWith('/api/auth/login') && !url.startsWith('/api/auth/register') && !url.startsWith('/api/auth/google')) {
     opts.headers = opts.headers || {};
     if (typeof opts.headers === 'object' && !Array.isArray(opts.headers) && !(opts.headers instanceof Headers)) {
       opts.headers['Authorization'] = token;
@@ -1007,9 +1043,19 @@ window.fetch = function(url, opts) {
 };
 
 // ===== HISTORY =====
-let histLoaded = false;
+function timeAgo(ts) {
+  if (!ts) return '';
+  const sec = Math.floor((Date.now() - ts) / 1000);
+  if (sec < 60) return 'ahora';
+  const min = Math.floor(sec / 60);
+  if (min < 60) return min + 'm';
+  const hr = Math.floor(min / 60);
+  if (hr < 24) return hr + 'h';
+  const d = Math.floor(hr / 24);
+  if (d < 7) return d + 'd';
+  return new Date(ts).toLocaleDateString('es');
+}
 async function loadHistory() {
-  if (!token) { _('histList').innerHTML = '<div class="hist-empty">Inicia sesion para ver tu historial</div>'; _('clearHistBtn').style.display = 'none'; return; }
   _('hsp').style.display = 'block'; _('herr').style.display = 'none';
   try {
     const r = await fetch('/api/history');
@@ -1017,13 +1063,16 @@ async function loadHistory() {
     _('hsp').style.display = 'none';
     if (d.error) { _('herr').textContent = d.error; _('herr').style.display = 'block'; return; }
     const items = d.history || d;
-    if (!items.length) { _('histList').innerHTML = '<div class="hist-empty">No hay descargas aun</div>'; _('clearHistBtn').style.display = 'none'; return; }
+    if (!items.length) { _('histList').innerHTML = '<div class="hist-empty">Aun no hay descargas</div>'; _('clearHistBtn').style.display = 'none'; return; }
     _('clearHistBtn').style.display = 'inline-flex';
-    _('histList').innerHTML = items.slice().reverse().map(h =>
-      '<div class="hist-item"><div class="hist-icon">&#127925;</div><div class="hist-info"><div class="hist-title">' + esc(h.title || 'Desconocido') + '</div><div class="hist-meta"><span>' + esc(h.filename || '') + '</span><span>' + (h.timestamp ? new Date(h.timestamp).toLocaleString('es') : '') + '</span></div></div>' +
-      (h.username ? '<div class="hist-user">' + esc(h.username) + '</div>' : '') +
+    _('histList').innerHTML = '<div class="hist-grid">' + items.slice().reverse().map(h =>
+      '<div class="hist-item">' +
+      (h.thumbnail ? '<img class="hist-thumb" src="' + h.thumbnail + '" alt="" loading="lazy" onerror="this.style.display=\'none\'">' : '<div class="hist-thumb" style="display:flex;align-items:center;justify-content:center;font-size:1.2rem;color:var(--text3)">&#9835;</div>') +
+      '<div class="hist-info"><div class="hist-title">' + esc(h.title || 'Desconocido') + '</div>' +
+      '<div class="hist-meta"><span>' + timeAgo(h.timestamp) + '</span><span>' + esc(h.format || 'mp3').toUpperCase() + '</span></div></div>' +
+      (h.username ? '<div class="hist-user">' + (h.userAvatar ? '<img src="' + h.userAvatar + '" alt="">' : '') + esc(h.username) + '</div>' : '<div class="hist-user" style="background:transparent;color:var(--text3)">anonimo</div>') +
       '</div>'
-    ).join('');
+    ).join('') + '</div>';
   } catch(e) { _('hsp').style.display = 'none'; _('herr').textContent = 'Error al cargar historial'; _('herr').style.display = 'block'; }
 }
 _('clearHistBtn').addEventListener('click', async () => {

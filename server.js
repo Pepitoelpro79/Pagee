@@ -87,13 +87,37 @@ app.get('/api/auth/me', (req, res) => {
   const auth = req.headers.authorization;
   if (!auth) return res.json({ user: null });
   const user = getUserFromToken(auth);
-  res.json({ user: user ? { id: user.id, username: user.username, email: user.email } : null });
+  res.json({ user: user ? { id: user.id, username: user.username, email: user.email, avatar: user.avatar || '' } : null });
 });
 
 app.post('/api/auth/logout', (req, res) => {
   const auth = req.headers.authorization;
   if (auth) { const sessions = getSessions(); saveSessions(sessions.filter(s => s.token !== auth)); }
   res.json({ ok: true });
+});
+
+// ============ GOOGLE OAUTH ============
+app.post('/api/auth/google', async (req, res) => {
+  try {
+    const { credential } = req.body;
+    if (!credential) return res.status(400).json({ error: 'Credencial requerida' });
+    const tokRes = await fetch(`https://oauth2.googleapis.com/tokeninfo?id_token=${credential}`);
+    if (!tokRes.ok) return res.status(401).json({ error: 'Token invalido' });
+    const info = await tokRes.json();
+    if (!info.email) return res.status(401).json({ error: 'Email requerido' });
+    const users = getUsers();
+    let user = users.find(u => u.email === info.email);
+    if (!user) {
+      user = { id: crypto.randomUUID(), username: info.name || info.email.split('@')[0], email: info.email, avatar: info.picture || '', googleId: info.sub, createdAt: Date.now() };
+      users.push(user); saveUsers(users);
+    }
+    const sessions = getSessions();
+    sessions.forEach(s => { if (s.userId === user.id) { saveSessions(sessions.filter(x => x.token !== s.token)); } });
+    const token = genToken();
+    sessions.push({ token, userId: user.id, username: user.username, createdAt: Date.now() });
+    saveSessions(sessions);
+    res.json({ token, user: { id: user.id, username: user.username, email: user.email, avatar: user.avatar } });
+  } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
 // ============ HISTORY ============
@@ -193,11 +217,11 @@ async function doDownload(url, fmt) {
     if (files.length) finalFile = path.join(DownloadsDir, files[0]);
     else throw new Error('Archivo no encontrado');
   }
-  return { filename: path.basename(finalFile), title: info.title, url };
+  return { filename: path.basename(finalFile), title: info.title, url, thumbnail: info.thumbnail || `https://i.ytimg.com/vi/${info.id}/hqdefault.jpg`, duration: info.duration || 0, channel: info.channel || info.uploader || '' };
 }
 
 function trackDownload(result, fmt, user) {
-  try { addHistory({ filename: result.filename, title: result.title, url: result.url || '', format: fmt || 'mp3', userId: user?.id || null, username: user?.username || 'anonymous' }); } catch {}
+  try { addHistory({ filename: result.filename, title: result.title, url: result.url || '', thumbnail: result.thumbnail || '', duration: result.duration || 0, channel: result.channel || '', format: fmt || 'mp3', userId: user?.id || null, username: user?.username || 'anonymous', userAvatar: user?.avatar || '' }); } catch {}
 }
 
 // ============ DOWNLOAD SINGLE ============
