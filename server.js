@@ -422,7 +422,7 @@ app.post('/api/ai/program', async (req, res) => {
 });
 
 // ============ COOKIES UPLOAD ============
-app.post('/api/cookies', express.text(), (req, res) => {
+app.post('/api/cookies', express.text({ limit: '5mb' }), (req, res) => {
   try {
     if (!req.body || typeof req.body !== 'string' || !req.body.trim()) return res.status(400).json({ error: 'Contenido requerido' });
     fs.writeFileSync(CookieFile, req.body, 'utf8');
