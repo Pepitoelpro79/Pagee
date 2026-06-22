@@ -457,6 +457,7 @@ textarea { font-family:var(--font); }
     <button class="tab" data-tab="download" role="tab" aria-selected="false">&#65039; Descargar</button>
     <button class="tab" data-tab="ai" role="tab" aria-selected="false">&#129504; IA</button>
     <button class="tab" data-tab="code" role="tab" aria-selected="false">&#128187; Codigo</button>
+    <button class="tab" data-tab="settings" role="tab" aria-selected="false">&#9881;</button>
     <button class="tab" data-tab="history" role="tab" aria-selected="false">&#128214; Historial</button>
   </nav>
 
@@ -622,6 +623,23 @@ textarea { font-family:var(--font); }
       <div class="cir">
         <input type="text" id="ci" placeholder="Escribe tu mensaje...">
         <button class="btn" id="cs">Enviar</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- SETTINGS PANEL (cookies) -->
+  <section class="panel" id="panel-settings" role="tabpanel">
+    <div class="gl" style="padding:1rem">
+      <span class="lbl" style="margin-bottom:.65rem">Configuracion</span>
+      <div style="margin-bottom:.65rem">
+        <div style="font-size:.78rem;font-weight:600;margin-bottom:.3rem">Cookies de YouTube</div>
+        <div style="font-size:.65rem;color:var(--text3);margin-bottom:.5rem">Si YouTube pide verificacion, exporta tus cookies del navegador y subelas aca.</div>
+        <label class="btn btn-sm" style="display:inline-flex;cursor:pointer">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right:4px"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+          Subir cookies.txt
+          <input type="file" id="cookieFileInput" accept=".txt" style="display:none">
+        </label>
+        <span id="cookieStatus" style="font-size:.7rem;color:var(--text3);margin-left:.5rem"></span>
       </div>
     </div>
   </section>
@@ -1075,6 +1093,20 @@ async function loadHistory() {
     ).join('') + '</div>';
   } catch(e) { _('hsp').style.display = 'none'; _('herr').textContent = 'Error al cargar historial'; _('herr').style.display = 'block'; }
 }
+// ===== COOKIES =====
+_('cookieFileInput').addEventListener('change', async function() {
+  const file = this.files[0];
+  if (!file) return;
+  const text = await file.text();
+  _('cookieStatus').textContent = 'Subiendo...';
+  try {
+    const r = await fetch('/api/cookies', { method:'POST', headers:{'Content-Type':'text/plain'}, body: text });
+    const d = await r.json();
+    _('cookieStatus').textContent = d.ok ? 'Cookies guardadas!' : 'Error: ' + (d.error||'?');
+    if (d.ok) toast('Cookies de YouTube guardadas', 'ok');
+  } catch(e) { _('cookieStatus').textContent = 'Error de conexion'; toast('Error al subir cookies', 'err'); }
+});
+
 _('clearHistBtn').addEventListener('click', async () => {
   if (!confirm('Limpiar todo el historial?')) return;
   _('hsp').style.display = 'block';
